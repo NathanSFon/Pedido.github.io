@@ -72,65 +72,52 @@
             }
         }
     </style>
-    <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
+   <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
     <script>
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             var simButton = document.getElementById('sim');
             var naoButton = document.getElementById('nao');
             var animacaoDiv = document.getElementById('animacao');
-            var isTouchDevice = false;
-            
-            // Verifica se o dispositivo é um dispositivo de toque (celular ou tablet)
-            if ('ontouchstart' in window || navigator.maxTouchPoints) {
-                isTouchDevice = true;
-            }
-            
-            simButton.addEventListener('click', function() {
-                simButton.style.display = 'none';
-                naoButton.style.display = 'none';
-                animacaoDiv.style.display = 'block';
-                animacaoDiv.classList.add('animacao');
-            });
-            
-            if (!isTouchDevice) {
+            var isTouchDevice = ('ontouchstart' in window || navigator.maxTouchPoints);
+
+            simButton.addEventListener('click', handleButtonClick);
+            naoButton.addEventListener('click', handleButtonClick);
+
+            if (isTouchDevice) {
+                var mcSim = new Hammer(simButton);
+                var mcNao = new Hammer(naoButton);
+
+                mcSim.on("tap", handleButtonClick);
+                mcNao.on("tap", handleButtonClick);
+            } else {
                 var maxX = window.innerWidth - naoButton.offsetWidth;
                 var maxY = window.innerHeight - naoButton.offsetHeight;
-                
-                document.addEventListener('mousemove', function(e) {
+
+                document.addEventListener('mousemove', function (e) {
                     var mouseX = e.clientX;
                     var mouseY = e.clientY;
-                    
+
                     var naoButtonRect = naoButton.getBoundingClientRect();
                     var naoButtonX = naoButtonRect.left + naoButtonRect.width / 2;
                     var naoButtonY = naoButtonRect.top + naoButtonRect.height / 2;
-                    
+
                     var distance = Math.sqrt(Math.pow(mouseX - naoButtonX, 2) + Math.pow(mouseY - naoButtonY, 2));
-                    
+
                     if (distance < 100) {
                         var newX = Math.floor(Math.random() * (maxX - naoButton.offsetWidth));
                         var newY = Math.floor(Math.random() * (maxY - naoButton.offsetHeight));
-                        
+
                         naoButton.style.left = newX + 'px';
                         naoButton.style.top = newY + 'px';
                     }
                 });
-            } else {
-                var mc = new Hammer(naoButton);
-                var startX, startY;
-                var buttonRect = naoButton.getBoundingClientRect();
-                
-                mc.on("panstart", function(e) {
-                    startX = buttonRect.left;
-                    startY = buttonRect.top;
-                });
-                
-                mc.on("panmove", function(e) {
-                    var newX = startX + e.deltaX;
-                    var newY = startY + e.deltaY;
-                    
-                    naoButton.style.left = newX + 'px';
-                    naoButton.style.top = newY + 'px';
-                });
+            }
+
+            function handleButtonClick() {
+                simButton.style.display = 'none';
+                naoButton.style.display = 'none';
+                animacaoDiv.style.display = 'block';
+                animacaoDiv.classList.add('animacao');
             }
         });
     </script>
